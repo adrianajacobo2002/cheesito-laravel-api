@@ -8,7 +8,7 @@ class Platillo extends Model
 {
     protected $primaryKey = 'id_platillo';
 
-    protected $fillable = ['nombre', 'precio', 'tipo'];
+    protected $fillable = ['nombre', 'precio', 'tipo', 'imagen_url'];
 
     public function inventario()
     {
