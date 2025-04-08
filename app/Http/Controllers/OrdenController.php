@@ -166,7 +166,28 @@ class OrdenController extends Controller
     }
 
 
-    
-    
+    public function ordenesActivasParaCocina()
+    {
+        $ordenes = Orden::with(['detalles.platillo', 'mesa'])
+            ->where('estado', 'por pagar')
+            ->has('detalles')
+            ->get();
+
+        return response()->json($ordenes);
+    }
+
+    public function actualizarEstadoDetalle(Request $request, $id)
+    {
+        $request->validate([
+            'estado' => 'required|in:en preparación,listo',
+        ]);
+
+        $detalle = DetalleOrden::findOrFail($id);
+        $detalle->estado = $request->estado;
+        $detalle->save();
+
+        return response()->json(['message' => 'Estado actualizado con éxito']);
+    }
+
 
 }

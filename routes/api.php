@@ -84,5 +84,11 @@ Route::middleware(['auth:sanctum', 'rol.cocinero'])->group(function () {
     Route::get('/cocinero/tareas', function () {
         return response()->json(['message' => 'Bienvenido, cocinero']);
     });
+
+    Route::prefix('chef')->group(function () {
+        Route::get('/ordenes', [OrdenController::class, 'ordenesActivasParaCocina']);
+        Route::put('/detalle-orden/{id}/estado', [OrdenController::class, 'actualizarEstadoDetalle']);
+    });
+    
 });
 
