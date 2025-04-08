@@ -12,8 +12,71 @@ class MesaController extends Controller
 {
     public function index()
     {
-        return response()->json(Mesa::all());
+        $mesas = Mesa::with(['ordenes' => function ($query) {
+            $query->whereIn('estado', ['activa', 'pendiente', 'en_preparacion']);
+        }])->get();
+
+        $mesas = $mesas->map(function ($mesa) {
+            return [
+                'id_mesa' => $mesa->id_mesa,
+                'num_mesa' => $mesa->num_mesa,
+                'capacidad' => $mesa->capacidad,
+                'estado' => $mesa->estado,
+                'ordenes_activas' => $mesa->ordenes->map(function ($orden) {
+                    return [
+                        'id_orden' => $orden->id_orden,
+                        'nombre_cliente' => $orden->nombre_cliente,
+                        'estado' => $orden->estado,
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json($mesas);
     }
+
+    public function show($id)
+    {
+        $mesa = Mesa::with(['ordenes' => function ($query) {
+            $query->whereIn('estado', ['activa', 'pendiente', 'en_preparacion'])->with('detalles.platillo');
+        }])->find($id);
+
+        if (!$mesa) {
+            return response()->json(['message' => 'Mesa no encontrada.'], 404);
+        }
+
+        if ($mesa->ordenes->isEmpty()) {
+            return response()->json([
+                'id_mesa' => $mesa->id_mesa,
+                'num_mesa' => $mesa->num_mesa,
+                'capacidad' => $mesa->capacidad,
+                'estado' => $mesa->estado,
+                'ordenes' => [],
+                'message' => 'La mesa no tiene órdenes activas.'
+            ]);
+        }
+
+        $ordenes = $mesa->ordenes->map(function ($orden) {
+            $total = $orden->detalles->sum('subtotal');
+
+            return [
+                'id_orden' => $orden->id_orden,
+                'nombre_cliente' => $orden->nombre_cliente,
+                'estado' => $orden->estado,
+                'cantidad_productos' => $orden->detalles->sum('cantidad'),
+                'total' => number_format($total, 2)
+            ];
+        });
+
+        return response()->json([
+            'id_mesa' => $mesa->id_mesa,
+            'num_mesa' => $mesa->num_mesa,
+            'capacidad' => $mesa->capacidad,
+            'estado' => $mesa->estado,
+            'ordenes' => $ordenes
+        ]);
+    }
+
 
     public function store(Request $request)
     {

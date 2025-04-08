@@ -84,4 +84,15 @@ class OrdenController extends Controller
 
         return response()->json($orden);
     }
+
+    public function historialOrdenes()
+    {
+        $ordenes = Orden::with(['mesa', 'factura'])
+            ->where('estado', 'pagada')
+            ->orderByDesc('fecha')
+            ->get();
+
+        return response()->json($ordenes);
+    }
+
 }

@@ -42,9 +42,13 @@ Route::middleware(['auth:sanctum', 'rol.admin'])->group(function () {
     Route::get('/inventario/agotados', [InventarioController::class, 'agotados']);
 
     Route::get('/mesas', [MesaController::class, 'index']);
+    Route::get('/mesas/{id}', [MesaController::class, 'show']);
+
     Route::post('/mesas', [MesaController::class, 'store']);
     Route::put('/mesas/{id}', [MesaController::class, 'update']);
     Route::delete('/mesas/{id}', [MesaController::class, 'destroy']);
+
+    Route::get('/ordenes/historial', [OrdenController::class, 'historialOrdenes']);
 
     Route::get('/platillos-vendidos', [ReporteController::class, 'platillosVendidos']);
     Route::get('/ingresos', [ReporteController::class, 'ingresos']);
@@ -55,8 +59,10 @@ Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
         return response()->json(['message' => 'Bienvenido, mesero']);
     });
 
-    Route::get('/mesero/mesas', [MesaController::class, 'mesasConOrdenes']);
+    Route::get('/mesero/mesas', [MesaController::class, 'index']);
+    Route::get('/mesero/mesas/{id}', [MesaController::class, 'show']);
 
+    Route::get('/mesero/mesas', [MesaController::class, 'mesasConOrdenes']);
     Route::post('/ordenes', [OrdenController::class, 'store']);
     Route::put('/ordenes/{id}/pagar', [OrdenController::class, 'pagar']);
 
