@@ -4,7 +4,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\MesaController;
+use App\Http\Controllers\OrdenController;
 use App\Http\Controllers\PlatilloController;
+use App\Http\Controllers\ReporteController;
 
 Route::get('/ping', function () {
     return response()->json([
@@ -41,12 +45,24 @@ Route::middleware(['auth:sanctum', 'rol.admin'])->group(function () {
     Route::post('/mesas', [MesaController::class, 'store']);
     Route::put('/mesas/{id}', [MesaController::class, 'update']);
     Route::delete('/mesas/{id}', [MesaController::class, 'destroy']);
+
+    Route::get('/platillos-vendidos', [ReporteController::class, 'platillosVendidos']);
+    Route::get('/ingresos', [ReporteController::class, 'ingresos']);
 });
 
 Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
     Route::get('/mesero/ordenes', function () {
         return response()->json(['message' => 'Bienvenido, mesero']);
     });
+
+    Route::get('/mesero/mesas', [MesaController::class, 'mesasConOrdenes']);
+
+    Route::post('/ordenes', [OrdenController::class, 'store']);
+    Route::put('/ordenes/{id}/pagar', [OrdenController::class, 'pagar']);
+
+    Route::get('/ordenes', [OrdenController::class, 'ordenesMesero']);
+    Route::get('/ordenes/{id}', [OrdenController::class, 'detalle']);
+
 });
 
 Route::middleware(['auth:sanctum', 'rol.cocinero'])->group(function () {

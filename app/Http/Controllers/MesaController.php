@@ -18,18 +18,19 @@ class MesaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'numero'    => 'required|integer|unique:mesas,numero',
+            'num_mesa' => 'required|integer|unique:mesas,num_mesa',
             'capacidad' => 'required|integer|min:1',
         ]);
 
         $mesa = Mesa::create([
-            'numero'    => $request->numero,
+            'num_mesa' => $request->num_mesa,
             'capacidad' => $request->capacidad,
-            'estado'    => 'disponible',
+            'estado' => 'disponible',
         ]);
 
         return response()->json($mesa, 201);
     }
+
 
     public function update(Request $request, $id)
     {
@@ -61,4 +62,14 @@ class MesaController extends Controller
 
         return response()->json(['message' => 'Mesa eliminada correctamente']);
     }
+
+    public function mesasConOrdenes()
+    {
+        $mesas = Mesa::with(['ordenes' => function ($query) {
+            $query->whereIn('estado', ['pendiente', 'en_preparacion']);
+        }])->get();
+
+        return response()->json($mesas);
+    }
+
 }
