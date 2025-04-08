@@ -31,4 +31,9 @@ class Orden extends Model
     {
         return $this->hasOne(Factura::class, 'orden_id');
     }
+
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        return $date->setTimezone(new \DateTimeZone('America/El_Salvador'))->format('Y-m-d H:i:s');
+    }
 }

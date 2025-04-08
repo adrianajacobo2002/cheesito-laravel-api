@@ -95,4 +95,20 @@ class OrdenController extends Controller
         return response()->json($ordenes);
     }
 
+    public function detalleHistorial($id)
+    {
+        $orden = Orden::with([
+            'mesa',
+            'mesero',
+            'factura',
+            'detalles.platillo'
+        ])
+        ->where('id_orden', $id)
+        ->where('estado', 'pagada')
+        ->firstOrFail();
+
+        return response()->json($orden);
+    }
+
+
 }

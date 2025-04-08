@@ -49,6 +49,7 @@ Route::middleware(['auth:sanctum', 'rol.admin'])->group(function () {
     Route::delete('/mesas/{id}', [MesaController::class, 'destroy']);
 
     Route::get('/ordenes/historial', [OrdenController::class, 'historialOrdenes']);
+    Route::get('/ordenes/historial/{id}', [OrdenController::class, 'detalleHistorial']);
 
     Route::get('/platillos-vendidos', [ReporteController::class, 'platillosVendidos']);
     Route::get('/ingresos', [ReporteController::class, 'ingresos']);
