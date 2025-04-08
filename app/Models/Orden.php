@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Orden extends Model
 {
+    protected $table = 'ordenes';
+
     protected $primaryKey = 'id_orden';
 
     protected $fillable = [
