@@ -65,11 +65,10 @@ Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
 
     Route::get('/mesero/mesas', [MesaController::class, 'mesasConOrdenes']);
     Route::post('/ordenes', [OrdenController::class, 'store']);
+    Route::post('/ordenes/{orden_id}/agregar-platillos', [OrdenController::class, 'agregarPlatillos']);
     Route::put('/ordenes/{id}/pagar', [OrdenController::class, 'pagar']);
-
     Route::get('/ordenes', [OrdenController::class, 'ordenesMesero']);
     Route::get('/ordenes/{id}', [OrdenController::class, 'detalle']);
-
 });
 
 Route::middleware(['auth:sanctum', 'rol.cocinero'])->group(function () {

@@ -57,6 +57,53 @@ class OrdenController extends Controller
         return response()->json(['message' => 'Orden creada exitosamente', 'orden' => $orden], 201);
     }
 
+    public function agregarPlatillos(Request $request, $orden_id)
+    {
+        $request->validate([
+            'platillos' => 'required|array|min:1',
+            'platillos.*.platillo_id' => 'required|exists:platillos,id_platillo',
+            'platillos.*.cantidad' => 'required|integer|min:1',
+        ]);
+
+        $orden = Orden::where('id_orden', $orden_id)
+            ->where('mesero_id', Auth::id())
+            ->where('estado', 'activa')
+            ->firstOrFail();
+
+        $mensajes = [];
+        $totalAgregado = 0;
+
+        foreach ($request->platillos as $item) {
+            $platillo = Platillo::with('inventario')->findOrFail($item['platillo_id']);
+            $stock = $platillo->inventario->cantidad_disponible ?? 0;
+
+            if ($stock < $item['cantidad']) {
+                $mensajes[] = "Stock insuficiente para {$platillo->nombre}. Disponible: $stock";
+                continue;
+            }
+
+            $platillo->inventario->decrement('cantidad_disponible', $item['cantidad']);
+
+            $subtotal = $platillo->precio * $item['cantidad'];
+
+            DetalleOrden::create([
+                'orden_id' => $orden->id_orden,
+                'platillo_id' => $platillo->id_platillo,
+                'cantidad' => $item['cantidad'],
+                'subtotal' => $subtotal,
+                'estado' => 'pendiente'
+            ]);
+
+            $totalAgregado += $subtotal;
+        }
+
+        return response()->json([
+            'message' => 'Platillos agregados a la orden.',
+            'total_agregado' => $totalAgregado,
+            'advertencias' => $mensajes
+        ]);
+    }
+
 
     public function pagar($id)
     {
@@ -110,5 +157,6 @@ class OrdenController extends Controller
         return response()->json($orden);
     }
 
+    
 
 }
