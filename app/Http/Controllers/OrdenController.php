@@ -25,13 +25,13 @@ class OrdenController extends Controller
         $mesa = Mesa::findOrFail($request->mesa_id);
 
         $ordenesActivas = Orden::where('mesa_id', $mesa->id_mesa)
-            ->whereIn('estado', ['activa', 'pendiente', 'en_preparacion'])
+            ->whereIn('estado', ['por pagar'])
             ->count();
 
 
         if ($mesa->estado === 'disponible' && $ordenesActivas === 0) {
-            $mesa->update(['estado' => 'ocupada']);
-        } elseif ($mesa->estado === 'ocupada') {
+            $mesa->update(['estado' => 'ocupado']);
+        } elseif ($mesa->estado === 'ocupado') {
             if ($ordenesActivas >= $mesa->capacidad) {
                 return response()->json([
                     'message' => 'La mesa ya alcanzó su límite de órdenes activas.'
@@ -47,7 +47,7 @@ class OrdenController extends Controller
         $orden = Orden::create([
             'mesa_id'        => $mesa->id_mesa,
             'mesero_id'      => $request->mesero_id, 
-            'estado'         => 'activa',
+            'estado'         => 'por pagar',
             'nombre_cliente' => $request->nombre_cliente,
             'fecha'          => now(),
         ]);
@@ -68,8 +68,7 @@ class OrdenController extends Controller
         ]);
 
         $orden = Orden::where('id_orden', $orden_id)
-            ->where('mesero_id', Auth::id())
-            ->where('estado', 'activa')
+            ->where('estado', 'por pagar')
             ->firstOrFail();
 
         $mensajes = [];
@@ -93,7 +92,7 @@ class OrdenController extends Controller
                 'platillo_id' => $platillo->id_platillo,
                 'cantidad' => $item['cantidad'],
                 'subtotal' => $subtotal,
-                'estado' => 'pendiente'
+                'estado' => 'en preparación'
             ]);
 
             $totalAgregado += $subtotal;
@@ -110,7 +109,6 @@ class OrdenController extends Controller
     {
         $orden = Orden::with('detalles.platillo')
             ->where('id_orden', $id)
-            ->where('mesero_id', Auth::id())
             ->firstOrFail();
 
         $detalles = $orden->detalles->map(function ($detalle) {
@@ -145,7 +143,7 @@ class OrdenController extends Controller
     public function historialOrdenes()
     {
         $ordenes = Orden::with(['mesa', 'factura'])
-            ->where('estado', 'pagada')
+            ->where('estado', 'cancelado')
             ->orderByDesc('fecha')
             ->get();
 
@@ -161,7 +159,7 @@ class OrdenController extends Controller
             'detalles.platillo'
         ])
         ->where('id_orden', $id)
-        ->where('estado', 'pagada')
+        ->where('estado', 'cancelado')
         ->firstOrFail();
 
         return response()->json($orden);
