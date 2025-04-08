@@ -37,4 +37,16 @@ class ReporteController extends Controller
 
         return response()->json($resultados);
     }
+
+    public function ingresosPorHora()
+    {
+        $resultados = DB::table('facturas')
+            ->select(DB::raw("DATE_FORMAT(created_at, '%H:00') as hora"), DB::raw('SUM(total) as total'))
+            ->groupBy('hora')
+            ->orderBy('hora')
+            ->get();
+
+        return response()->json($resultados);
+    }
+
 }
