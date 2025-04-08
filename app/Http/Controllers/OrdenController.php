@@ -13,16 +13,12 @@ use Illuminate\Support\Facades\Auth;
 
 class OrdenController extends Controller
 {
-    public function mesasAsignadas()
-    {
-        $mesas = Mesa::where('mesero_id', Auth::id())->with('ordenes')->get();
-        return response()->json($mesas);
-    }
 
     public function store(Request $request)
     {
         $request->validate([
             'mesa_id' => 'required|exists:mesas,id_mesa',
+            'mesero_id' => 'required|exists:meseros,id_mesero',
             'nombre_cliente' => 'required|string|max:100'
         ]);
 
@@ -31,6 +27,7 @@ class OrdenController extends Controller
         $ordenesActivas = Orden::where('mesa_id', $mesa->id_mesa)
             ->whereIn('estado', ['activa', 'pendiente', 'en_preparacion'])
             ->count();
+
 
         if ($mesa->estado === 'disponible' && $ordenesActivas === 0) {
             $mesa->update(['estado' => 'ocupada']);
@@ -46,16 +43,21 @@ class OrdenController extends Controller
             ], 400);
         }
 
+
         $orden = Orden::create([
             'mesa_id'        => $mesa->id_mesa,
-            'mesero_id'      => Auth::id(),
+            'mesero_id'      => $request->mesero_id, 
             'estado'         => 'activa',
             'nombre_cliente' => $request->nombre_cliente,
             'fecha'          => now(),
         ]);
 
-        return response()->json(['message' => 'Orden creada exitosamente', 'orden' => $orden], 201);
+        return response()->json([
+            'message' => 'Orden creada exitosamente',
+            'orden' => $orden
+        ], 201);
     }
+
 
     public function agregarPlatillos(Request $request, $orden_id)
     {
@@ -104,32 +106,40 @@ class OrdenController extends Controller
         ]);
     }
 
-
-    public function pagar($id)
+    public function detalleConTotales($id)
     {
-        $orden = Orden::where('id_orden', $id)
-                      ->where('mesero_id', Auth::id())
-                      ->firstOrFail();
+        $orden = Orden::with('detalles.platillo')
+            ->where('id_orden', $id)
+            ->where('mesero_id', Auth::id())
+            ->firstOrFail();
 
-        $orden->update(['estado' => 'pagada']);
+        $detalles = $orden->detalles->map(function ($detalle) {
+            return [
+                'nombre' => $detalle->platillo->nombre,
+                'precio' => number_format($detalle->platillo->precio, 2),
+                'imagen_url' => $detalle->platillo->imagen_url,
+                'cantidad' => $detalle->cantidad,
+                'estado' => $detalle->estado,
+                'subtotal' => number_format($detalle->subtotal, 2),
+            ];
+        });
 
-        return response()->json(['message' => 'Orden pagada']);
-    }
+        $subtotal = $orden->detalles->sum('subtotal');
+        $propina = round($subtotal * 0.10, 2);
+        $total = $subtotal + $propina;
 
-    public function ordenesMesero()
-    {
-        $ordenes = Orden::where('mesero_id', Auth::id())->with('mesa', 'detalles.platillo')->get();
-        return response()->json($ordenes);
-    }
-
-    public function detalle($id)
-    {
-        $orden = Orden::with('mesa', 'detalles.platillo')
-                      ->where('id_orden', $id)
-                      ->where('mesero_id', Auth::id())
-                      ->firstOrFail();
-
-        return response()->json($orden);
+        return response()->json([
+            'id_orden' => $orden->id_orden,
+            'cliente' => $orden->nombre_cliente,
+            'fecha' => $orden->fecha->format('d/m/Y'),
+            'estado' => $orden->estado,
+            'detalles' => $detalles,
+            'pago' => [
+                'subtotal' => number_format($subtotal, 2),
+                'propina' => number_format($propina, 2),
+                'total' => number_format($total, 2),
+            ]
+        ]);
     }
 
     public function historialOrdenes()

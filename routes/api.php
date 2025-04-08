@@ -9,6 +9,8 @@ use App\Http\Controllers\MesaController;
 use App\Http\Controllers\OrdenController;
 use App\Http\Controllers\PlatilloController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\FacturaController;
+use App\Http\Controllers\MeseroController;
 
 Route::get('/ping', function () {
     return response()->json([
@@ -64,11 +66,17 @@ Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
     Route::get('/mesero/mesas/{id}', [MesaController::class, 'show']);
 
     Route::get('/mesero/mesas', [MesaController::class, 'mesasConOrdenes']);
+
+    Route::get('/ordenes/{id}', [OrdenController::class, 'detalle']);
+    Route::get('/ordenes/{id}/resumen', [OrdenController::class, 'detalleConTotales']);
+    Route::get('/ordenes/historial', [OrdenController::class, 'historialOrdenes']);
     Route::post('/ordenes', [OrdenController::class, 'store']);
     Route::post('/ordenes/{orden_id}/agregar-platillos', [OrdenController::class, 'agregarPlatillos']);
-    Route::put('/ordenes/{id}/pagar', [OrdenController::class, 'pagar']);
-    Route::get('/ordenes', [OrdenController::class, 'ordenesMesero']);
-    Route::get('/ordenes/{id}', [OrdenController::class, 'detalle']);
+    
+    Route::post('/facturas/orden/{id}/pagar', [FacturaController::class, 'pagarOrden']);
+
+    Route::get('/meseros', [MeseroController::class, 'index']);
+
 });
 
 Route::middleware(['auth:sanctum', 'rol.cocinero'])->group(function () {
