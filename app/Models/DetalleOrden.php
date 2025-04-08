@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DetalleOrden extends Model
 {
+    protected $table = 'detalle_orden';
+
     protected $primaryKey = 'id_detalle_orden';
 
     protected $fillable = ['orden_id', 'platillo_id', 'cantidad', 'subtotal', 'estado'];
