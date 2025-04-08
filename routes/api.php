@@ -70,7 +70,7 @@ Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
 
     Route::get('/ordenes/{id}', [OrdenController::class, 'detalle']);
     Route::get('/ordenes/{id}/resumen', [OrdenController::class, 'detalleConTotales']);
-    Route::get('/ordenes/historial', [OrdenController::class, 'historialOrdenes']);
+    Route::get('/mesero/ordenes/historial', [OrdenController::class, 'historialOrdenes']);
     Route::post('/ordenes', [OrdenController::class, 'store']);
     Route::post('/ordenes/{orden_id}/agregar-platillos', [OrdenController::class, 'agregarPlatillos']);
     
