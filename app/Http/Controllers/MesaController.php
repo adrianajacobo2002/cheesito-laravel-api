@@ -13,7 +13,7 @@ class MesaController extends Controller
     public function index()
     {
         $mesas = Mesa::with(['ordenes' => function ($query) {
-            $query->whereIn('estado', ['activa', 'pendiente', 'en_preparacion']);
+            $query->whereIn('estado', ['por pagar']);
         }])->get();
 
         $mesas = $mesas->map(function ($mesa) {
@@ -38,7 +38,7 @@ class MesaController extends Controller
     public function show($id)
     {
         $mesa = Mesa::with(['ordenes' => function ($query) {
-            $query->whereIn('estado', ['activa', 'pendiente', 'en_preparacion'])->with('detalles.platillo');
+            $query->whereIn('estado', ['por pagar'])->with('detalles.platillo');
         }])->find($id);
 
         if (!$mesa) {
@@ -99,16 +99,16 @@ class MesaController extends Controller
     {
         $mesa = Mesa::findOrFail($id);
 
-        if ($mesa->estado !== 'disponible' || Orden::where('mesa_id', $id)->whereIn('estado', ['pendiente', 'en_preparacion'])->exists()) {
+        if ($mesa->estado !== 'disponible' || Orden::where('mesa_id', $id)->where('estado', 'por pagar')->exists()) {
             return response()->json(['message' => 'La mesa está ocupada o tiene órdenes activas.'], 400);
         }
 
         $request->validate([
-            'numero'    => 'sometimes|integer|unique:mesas,numero,' . $id,
+            'num_mesa'    => 'sometimes|integer|unique:mesas,num_mesa,' . $id,
             'capacidad' => 'sometimes|integer|min:1',
         ]);
 
-        $mesa->update($request->only('numero', 'capacidad'));
+        $mesa->update($request->only('num_mesa', 'capacidad'));
 
         return response()->json($mesa);
     }
@@ -117,7 +117,7 @@ class MesaController extends Controller
     {
         $mesa = Mesa::findOrFail($id);
 
-        if ($mesa->estado !== 'disponible' || Orden::where('mesa_id', $id)->whereIn('estado', ['pendiente', 'en_preparacion'])->exists()) {
+        if ($mesa->estado !== 'disponible' || Orden::where('mesa_id', $id)->where('estado', 'por pagar')->exists()) {
             return response()->json(['message' => 'No se puede eliminar una mesa ocupada o con órdenes activas.'], 400);
         }
 
@@ -129,10 +129,44 @@ class MesaController extends Controller
     public function mesasConOrdenes()
     {
         $mesas = Mesa::with(['ordenes' => function ($query) {
-            $query->whereIn('estado', ['pendiente', 'en_preparacion']);
+            $query->where('estado', 'por pagar');
         }])->get();
 
         return response()->json($mesas);
     }
+
+    public function allInfo()
+    {
+        $mesas = Mesa::with(['ordenes.detalles.platillo'])->get();
+
+        $resultado = $mesas->map(function ($mesa) {
+            return [
+                'id_mesa' => $mesa->id_mesa,
+                'num_mesa' => $mesa->num_mesa,
+                'capacidad' => $mesa->capacidad,
+                'estado' => $mesa->estado,
+                'ordenes' => $mesa->ordenes->map(function ($orden) {
+                    return [
+                        'id_orden' => $orden->id_orden,
+                        'estado' => $orden->estado,
+                        'fecha' => $orden->fecha->format('Y-m-d H:i:s'),
+                        'nombre_cliente' => $orden->nombre_cliente,
+                        'detalles' => $orden->detalles->map(function ($detalle) {
+                            return [
+                                'platillo' => $detalle->platillo->nombre,
+                                'precio' => number_format($detalle->platillo->precio, 2),
+                                'cantidad' => $detalle->cantidad,
+                                'subtotal' => number_format($detalle->subtotal, 2),
+                                'estado' => $detalle->estado,
+                            ];
+                        }),
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json($resultado);
+    }
+
 
 }
