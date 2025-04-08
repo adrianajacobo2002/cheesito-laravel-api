@@ -64,7 +64,7 @@ Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
 
     Route::get('/mesero/mesas', [MesaController::class, 'index']);
     Route::get('/mesero/mesas/{id}', [MesaController::class, 'show']);
-    Route::get('/mesas', [MesaController::class, 'allInfo']);
+    Route::get('/mesero/mesas/allinfo', [MesaController::class, 'allInfo']);
 
     Route::get('/mesero/mesas', [MesaController::class, 'mesasConOrdenes']);
 

@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\Mesa;
 use App\Models\Orden;
 
+use Carbon\Carbon;
+
+
 
 class MesaController extends Controller
 {
@@ -149,7 +152,7 @@ class MesaController extends Controller
                     return [
                         'id_orden' => $orden->id_orden,
                         'estado' => $orden->estado,
-                        'fecha' => $orden->fecha->format('Y-m-d H:i:s'),
+                        'fecha' => Carbon::parse($orden->fecha)->format('Y-m-d H:i:s'),
                         'nombre_cliente' => $orden->nombre_cliente,
                         'detalles' => $orden->detalles->map(function ($detalle) {
                             return [
@@ -167,6 +170,5 @@ class MesaController extends Controller
 
         return response()->json($resultado);
     }
-
 
 }
