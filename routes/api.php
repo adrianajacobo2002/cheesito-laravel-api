@@ -6,6 +6,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PlatilloController;
 
+Route::get('/ping', function () {
+    return response()->json([
+        'message' => 'Hola desde la API de Cheesito',
+        'status' => 'OK',
+    ]);
+});
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -31,9 +37,11 @@ Route::middleware(['auth:sanctum', 'rol.admin'])->group(function () {
     Route::put('/inventario/{id}/agregar', [InventarioController::class, 'agregarStock']);
     Route::get('/inventario/agotados', [InventarioController::class, 'agotados']);
 
-    
+    Route::get('/mesas', [MesaController::class, 'index']);
+    Route::post('/mesas', [MesaController::class, 'store']);
+    Route::put('/mesas/{id}', [MesaController::class, 'update']);
+    Route::delete('/mesas/{id}', [MesaController::class, 'destroy']);
 });
-
 
 Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
     Route::get('/mesero/ordenes', function () {
