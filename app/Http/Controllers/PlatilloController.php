@@ -114,5 +114,15 @@ class PlatilloController extends Controller
         ]);
     }
 
+    public function exportarPDF()
+    {
+        $platillos = Platillo::with('inventario')->get();
+
+        $pdf = Pdf::loadView('pdf.platillos', compact('platillos'))
+                ->setPaper('A4', 'portrait');
+
+        return $pdf->download('platillos_existencias.pdf');
+    }
+
 
 }
