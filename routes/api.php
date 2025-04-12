@@ -55,7 +55,8 @@ Route::middleware(['auth:sanctum', 'rol.admin'])->group(function () {
 
     Route::get('/platillos-vendidos', [ReporteController::class, 'platillosVendidos']);
     Route::get('/ingresos', [ReporteController::class, 'ingresos']);
-    Route::get('/facturas/por-hora', [ReporteController::class, 'ingresosPorHora']);
+    Route::get('/ingresos-por-hora', [ReporteController::class, 'ingresosPorHora']);
+
 });
 
 Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
