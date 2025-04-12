@@ -17,6 +17,13 @@ class PlatilloController extends Controller
         return response()->json($platillos);
     }
 
+    public function indexmesero()
+    {
+        $platillos = Platillo::with('inventario')->get();
+
+        return response()->json($platillos);
+    }
+
     public function show($id)
     {
         $platillo = Platillo::with('inventario')->findOrFail($id);

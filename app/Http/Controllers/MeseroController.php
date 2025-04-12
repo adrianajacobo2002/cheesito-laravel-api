@@ -11,7 +11,7 @@ class MeseroController extends Controller
 {
     public function index()
     {
-        $meseros = Mesero::select('id_mesero', 'nombre')->get();
+        $meseros = Mesero::select('id_mesero', 'nombre', 'codigo')->get();
 
         return response()->json($meseros);
     }

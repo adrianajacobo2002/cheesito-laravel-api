@@ -14,6 +14,11 @@ class Orden extends Model
         'fecha', 'estado', 'nombre_cliente', 'mesero_id', 'mesa_id'
     ];
 
+    protected $casts = [
+        'fecha' => 'datetime',
+    ];
+
+    
     public function mesero()
     {
         return $this->belongsTo(Mesero::class, 'mesero_id');

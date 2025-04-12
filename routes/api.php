@@ -64,6 +64,8 @@ Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
         return response()->json(['message' => 'Bienvenido, mesero']);
     });
 
+    Route::get('/mesero/platillos', [PlatilloController::class, 'indexmesero']);
+
     Route::get('/mesero/mesas', [MesaController::class, 'index']);
     Route::get('/mesero/mesas/{id}', [MesaController::class, 'show']);
     Route::get('/mesero/mesas/allinfo', [MesaController::class, 'allInfo']);
