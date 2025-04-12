@@ -132,9 +132,24 @@ class MesaController extends Controller
     public function mesasConOrdenes()
     {
         $mesas = Mesa::with(['ordenes' => function ($query) {
-            $query->where('estado', 'por pagar');
+            $query->where('estado', 'por pagar')->select('id_orden', 'mesa_id', 'nombre_cliente');
         }])->get();
-
+    
+        $mesas->transform(function ($mesa) {
+            return [
+                'id_mesa' => $mesa->id_mesa,
+                'num_mesa' => $mesa->num_mesa,
+                'capacidad' => $mesa->capacidad,
+                'estado' => $mesa->estado,
+                'ordenes_activas' => $mesa->ordenes->map(function ($orden) {
+                    return [
+                        'id_orden' => $orden->id_orden,
+                        'nombre_cliente' => $orden->nombre_cliente
+                    ];
+                })
+            ];
+        });
+    
         return response()->json($mesas);
     }
 
