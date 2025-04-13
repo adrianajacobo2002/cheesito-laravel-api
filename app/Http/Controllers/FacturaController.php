@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\Orden;
 use App\Models\Factura;
 use App\Models\Mesa;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class FacturaController extends Controller
 {
     public function pagarOrden($orden_id)
     {
-        $orden = Orden::with('detalles')->where('id_orden', $orden_id)->firstOrFail();
+        $orden = Orden::with(['detalles.platillo', 'mesa'])->where('id_orden', $orden_id)->firstOrFail();
 
         if ($orden->estado !== 'por pagar') {
             return response()->json(['message' => 'La orden ya fue cancelada.'], 400);
@@ -51,4 +51,13 @@ class FacturaController extends Controller
         ], 201);
     }
 
+    public function generarPDF($factura_id)
+    {
+        $factura = Factura::with('orden.detalles.platillo', 'orden.mesa')->findOrFail($factura_id);
+
+        $pdf = Pdf::loadView('pdf.factura', compact('factura'))
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->download("factura_{$factura->id}.pdf");
+    }
 }
