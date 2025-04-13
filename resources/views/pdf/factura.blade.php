@@ -56,8 +56,7 @@
 <body>
     <h1>Cheesito</h1>
     <h2>Factura y Detalle de Consumo</h2>
-
-    <p><strong>Fecha:</strong> {{ optional($factura->fecha)->format('d/m/Y H:i') ?? 'N/D' }}</p>
+    
     <p><strong>Mesa:</strong> {{ optional($factura->orden->mesa)->num_mesa ?? 'Sin mesa asignada' }}</p>
 
     <table>

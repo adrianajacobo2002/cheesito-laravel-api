@@ -84,6 +84,7 @@ Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
     Route::get('/meseros', [MeseroController::class, 'index']);
 
     Route::post('/detalle-orden/{id}', [OrdenController::class, 'eliminarDetalle']);
+    Route::get('/mesero/facturas/pdf/{factura_id}', [FacturaController::class, 'generarPDF'])->name('facturas.pdf');
 });
 
 Route::middleware(['auth:sanctum', 'rol.cocinero'])->group(function () {
