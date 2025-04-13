@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 use App\Models\Platillo; 
 use App\Models\Inventario;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PlatilloController extends Controller
 {
@@ -116,6 +118,11 @@ class PlatilloController extends Controller
 
     public function exportarPDF()
     {
+        $fontCachePath = storage_path('fonts');
+        if (!File::exists($fontCachePath)) {
+            File::makeDirectory($fontCachePath, 0755, true);
+        }
+
         $platillos = Platillo::with('inventario')->get();
 
         $pdf = Pdf::loadView('pdf.platillos', compact('platillos'))
@@ -123,6 +130,7 @@ class PlatilloController extends Controller
 
         return $pdf->download('platillos_existencias.pdf');
     }
+
 
 
 }

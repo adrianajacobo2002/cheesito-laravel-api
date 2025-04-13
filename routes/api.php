@@ -52,6 +52,7 @@ Route::middleware(['auth:sanctum', 'rol.admin'])->group(function () {
 
     Route::get('/ordenes/historial', [OrdenController::class, 'historialOrdenes']);
     Route::get('/ordenes/historial/{id}', [OrdenController::class, 'detalleHistorial']);
+    Route::get('/admin/platillos/pdf', [PlatilloController::class, 'exportarPDF'])->name('admin.platillos.pdf');
 
     Route::get('/platillos-vendidos', [ReporteController::class, 'platillosVendidos']);
     Route::get('/ingresos', [ReporteController::class, 'ingresos']);
