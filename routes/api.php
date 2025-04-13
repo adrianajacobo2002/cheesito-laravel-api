@@ -82,6 +82,7 @@ Route::middleware(['auth:sanctum', 'rol.mesero'])->group(function () {
 
     Route::get('/meseros', [MeseroController::class, 'index']);
 
+    Route::post('/detalle-orden/{id}', [OrdenController::class, 'eliminarDetalle']);
 });
 
 Route::middleware(['auth:sanctum', 'rol.cocinero'])->group(function () {

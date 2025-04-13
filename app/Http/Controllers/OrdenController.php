@@ -113,6 +113,7 @@ class OrdenController extends Controller
 
         $detalles = $orden->detalles->map(function ($detalle) {
             return [
+                'id_detalle' => $detalle->id_detalle_orden,
                 'nombre' => $detalle->platillo->nombre,
                 'precio' => number_format($detalle->platillo->precio, 2),
                 'imagen_url' => $detalle->platillo->imagen_url,
@@ -189,5 +190,39 @@ class OrdenController extends Controller
         return response()->json(['message' => 'Estado actualizado con éxito']);
     }
 
+    public function eliminarDetalle(Request $request, $id)
+    {
+        $detalle = DetalleOrden::findOrFail($id);
+
+        // Solo puede eliminar si está en preparación
+        if ($detalle->estado !== 'en preparación') {
+            return response()->json(['message' => 'Solo se puede eliminar si está en preparación'], 400);
+        }
+
+        // Devolver stock al inventario
+        $platillo = Platillo::with('inventario')->findOrFail($detalle->platillo_id);
+        $cantidadEliminar = intval($request->cantidad);
+
+        if ($cantidadEliminar < $detalle->cantidad) {
+            // Eliminar parcialmente
+            $detalle->cantidad -= $cantidadEliminar;
+            $detalle->subtotal = $detalle->cantidad * $platillo->precio;
+            $detalle->save();
+
+            $platillo->inventario->increment('cantidad_disponible', $cantidadEliminar);
+        } else {
+            // Eliminar completamente
+            $platillo->inventario->increment('cantidad_disponible', $detalle->cantidad);
+            $detalle->delete();
+        }
+
+        return response()->json(['message' => 'Detalle actualizado o eliminado correctamente']);
+    }
 
 }
+
+
+
+
+
+
